@@ -38,7 +38,7 @@ jobs:
           set -e
           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip -o migrate.zip
           unzip migrate.zip
-          sudo mv migrate.exe/usr/bin/migrate
+          sudo mv migrate.exe /usr/bin/migrate
           which migrate
 
       - name: Run migrations
