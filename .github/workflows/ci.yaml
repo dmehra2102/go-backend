@@ -35,10 +35,19 @@ jobs:
 
       - name: Install golang-migrate
         run: |
-          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.windows-amd64.zip -o migrate.zip
-          unzip migrate.zip
-          sudo mv migrate.exe /usr/bin/migrate
-          which migrate
+          set -e  # Stop the script if any command fails
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz -o migrate.tar.gz
+          tar -xvzf migrate.tar.gz  # Extract the tar.gz file
+          sudo mv migrate /usr/bin/migrate  # Move the binary to /usr/bin
+          sudo chmod +x /usr/bin/migrate  # Ensure it is executable
+          which migrate  # Check if migrate is in PATH
+
+      - name: Wait for PostgreSQL to be ready
+        run: |
+          until pg_isready -h localhost -U root; do
+            echo "Waiting for PostgreSQL..."
+            sleep 2
+          done
 
       - name: Run migrations
         run: make migrateup
