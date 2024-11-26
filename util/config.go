@@ -21,6 +21,8 @@ func LoadConfig(path string) (config Config, err error) {
 		return
 	}
 
+	// this line populates the config variable with values from
+	// Viper based on the keys defined in the struct tags.
 	err = viper.Unmarshal(&config)
 	return
 }
