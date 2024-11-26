@@ -7,21 +7,22 @@ import (
 	"os/signal"
 	"simple_bank/api"
 	db "simple_bank/db/sqlc"
+	"simple_bank/util"
 	"syscall"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-const (
-	dbSource      = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
-	serverAddress = "0.0.0.0:8080"
-)
-
 func main() {
+	config, err := util.LoadConfig(".")
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	conn, err := pgxpool.New(ctx, dbSource)
+	conn, err := pgxpool.New(ctx, config.DBSource)
 	if err != nil {
 		log.Fatalf("cannot connect to DB: %v", err)
 	}
@@ -32,7 +33,7 @@ func main() {
 	server := api.NewServer(store)
 
 	go func() {
-		if err = server.Start(serverAddress); err != nil {
+		if err = server.Start(config.ServerAddress); err != nil {
 			log.Fatalf("Cannot start server: %v", err)
 		}
 	}()
