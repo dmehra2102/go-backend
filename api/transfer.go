@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	db "simple_bank/db/sqlc"
@@ -28,6 +29,10 @@ func (server *Server) createTransfer(ctx *gin.Context) {
 	}
 
 	if !server.validAccount(ctx, req.ToAccountID, req.Currency) {
+		return
+	}
+
+	if !server.sufficientBalance(ctx, req.FromAccountID, req.Amount) {
 		return
 	}
 
@@ -62,6 +67,25 @@ func (server *Server) validAccount(ctx *gin.Context, accountID int64, currency s
 	if account.Currency != currency {
 		err := fmt.Errorf("account [%d] currency mismatch: %s vs % s", accountID, account.Currency, currency)
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return false
+	}
+
+	return true
+}
+
+func (server *Server) sufficientBalance(ctx *gin.Context, accountID int64, amount int64) bool {
+	account, err := server.store.GetAccount(ctx, accountID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return false
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return false
+	}
+
+	if account.Balance < amount {
+		ctx.JSON(http.StatusNotFound, errorResponse(errors.New("insufficient balance")))
 		return false
 	}
 
