@@ -34,13 +34,14 @@ func NewServer(config util.Config, store db.Store) (*Server, error) {
 	router.POST("/users", server.createUser)
 	router.POST("/users/login", server.loginUser)
 
-	router.POST("/account", server.createAccount)
-	router.GET("/account/:id", server.getAccount)
-	router.GET("/account/all", server.listAccounts)
-	router.PATCH("/account/:id", server.updateAccount)
-	router.DELETE("/account/:id", server.deleteAccount)
+	authRouter := router.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRouter.POST("/account", server.createAccount)
+	authRouter.GET("/account/:id", server.getAccount)
+	authRouter.GET("/account/all", server.listAccounts)
+	authRouter.PATCH("/account/:id", server.updateAccount)
+	authRouter.DELETE("/account/:id", server.deleteAccount)
 
-	router.POST("/transfers", server.createTransfer)
+	authRouter.POST("/transfers", server.createTransfer)
 
 	server.router = router
 	return server, nil
