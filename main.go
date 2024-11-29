@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"simple_bank/api"
 	db "simple_bank/db/sqlc"
-	gapi "simple_bank/grpc-api"
+	gapi "simple_bank/gapi"
 	"simple_bank/pb"
 	"simple_bank/util"
 	"syscall"
