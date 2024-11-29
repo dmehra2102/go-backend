@@ -20,10 +20,13 @@ COPY start.sh .
 
 COPY db/migration ./db/migration
 
-EXPOSE 8080
+# Install dos2unix to convert line endings
+RUN apk add --no-cache dos2unix && dos2unix /app/start.sh
 
+# Ensure start.sh is executable
 RUN chmod +x /app/start.sh
 
-CMD [ "/app/main" ]
+EXPOSE 8080
 
-ENTRYPOINT [ "/app/start.sh" ]
+# Set entrypoint
+ENTRYPOINT ["/app/start.sh"]
