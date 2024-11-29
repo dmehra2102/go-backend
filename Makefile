@@ -51,9 +51,9 @@ mock:
 
 proto:
 	del /Q pb\*.go
-	protoc --proto_path=protos --go_out=pb --go_opt=paths=source_relative \
+	protoc --proto_path=proto --go_out=pb --go_opt=paths=source_relative \
 	--go-grpc_out=pb --go-grpc_opt=paths=source_relative \
-	protos/*.proto
+	proto/*.proto
 evans:
 	evans --host localhost --port 9090 -r repl
 
