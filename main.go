@@ -4,10 +4,14 @@ import (
 	"context"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"simple_bank/api"
 	db "simple_bank/db/sqlc"
 	gapi "simple_bank/gapi"
 	"simple_bank/pb"
 	"simple_bank/util"
+	"syscall"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"google.golang.org/grpc"
@@ -57,21 +61,21 @@ func runGrpcServer(config util.Config, store db.Store) {
 	}
 }
 
-// func runGinServer(config util.Config, store db.Store) {
-// 	server, err := api.NewServer(config, store)
-// 	if err != nil {
-// 		log.Fatal("cannot create server")
-// 	}
+func runGinServer(config util.Config, store db.Store) {
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server")
+	}
 
-// 	go func() {
-// 		if err = server.Start(config.HTTPServerAddress); err != nil {
-// 			log.Fatalf("Cannot start server: %v", err)
-// 		}
-// 	}()
+	go func() {
+		if err = server.Start(config.HTTPServerAddress); err != nil {
+			log.Fatalf("Cannot start server: %v", err)
+		}
+	}()
 
-// 	sigChan := make(chan os.Signal, 1)
-// 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
-// 	<-sigChan
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+	<-sigChan
 
-// 	log.Println("Shutting down server...")
-// }
+	log.Println("Shutting down server...")
+}
