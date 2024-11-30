@@ -69,10 +69,10 @@ func (server *Server) LoginUser(ctx context.Context, req *pb.LoginUserRequest) (
 
 func validateLoginUserRequest(req *pb.LoginUserRequest) (violations []*errdetails.BadRequest_FieldViolation) {
 	if err := util.ValidateUsername(req.GetUsername()); err != nil {
-		violations = append(violations, fieldVoilation("username", err))
+		violations = append(violations, fieldViolation("username", err))
 	}
 	if err := util.ValidatePassword(req.GetPassword()); err != nil {
-		violations = append(violations, fieldVoilation("password", err))
+		violations = append(violations, fieldViolation("password", err))
 	}
 
 	return violations

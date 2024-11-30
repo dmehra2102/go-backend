@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func fieldVoilation(field string, err error) *errdetails.BadRequest_FieldViolation {
+func fieldViolation(field string, err error) *errdetails.BadRequest_FieldViolation {
 	return &errdetails.BadRequest_FieldViolation{
 		Field:       field,
 		Description: err.Error(),
