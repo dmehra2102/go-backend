@@ -5,7 +5,10 @@ import (
 	db "simple_bank/db/sqlc"
 	"simple_bank/pb"
 	"simple_bank/util"
+	"simple_bank/worker"
+	"time"
 
+	"github.com/hibiken/asynq"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,6 +37,20 @@ func (server *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest)
 		if err == db.ErrRecordNotFound {
 			return nil, status.Errorf(codes.AlreadyExists, "user already exists : %s", err)
 		}
+		return nil, status.Errorf(codes.Internal, "failed to create user : %s", err)
+	}
+
+	taskPayload := &worker.PayloadSendVerifyEmail{
+		Username: user.Username,
+	}
+
+	opts := []asynq.Option{
+		asynq.MaxRetry(10),
+		asynq.ProcessIn(10 * time.Second),
+		asynq.Queue(worker.QueueCritical),
+	}
+	err = server.taskDistributor.DistributeTaskSendVerifyEmail(ctx, taskPayload, opts...)
+	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user : %s", err)
 	}
 
